@@ -79,24 +79,23 @@ export default function AdminLegal() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
-  useEffect(() => {
+    useEffect(() => {
+    async function fetchData() {
+      setLoading(true)
+      try {
+        const res = await fetch('/api/admin/company-data')
+        if (res.ok) {
+          const data = await res.json()
+          setCompanyData(data)
+        }
+      } catch (error) {
+        console.error('Errore nel recupero dati:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchData()
   }, [])
-
-  async function fetchData() {
-    setLoading(true)
-    try {
-      const res = await fetch('/api/admin/company-data')
-      if (res.ok) {
-        const data = await res.json()
-        setCompanyData(data)
-      }
-    } catch (error) {
-      console.error('Errore nel recupero dati:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   async function saveData() {
     setSaving(true)

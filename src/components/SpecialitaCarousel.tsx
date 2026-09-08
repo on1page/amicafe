@@ -29,24 +29,23 @@ export default function SpecialitaCarousel() {
   const [articoli, setArticoli] = useState<Articolo[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+    useEffect(() => {
+    async function fetchArticoli() {
+      try {
+        const response = await fetch('/api/articoli');
+        if (!response.ok) {
+          throw new Error('Errore nel caricamento degli articoli');
+        }
+        const data = await response.json();
+        setArticoli(data);
+      } catch (error) {
+        console.error('Errore:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchArticoli();
   }, []);
-
-  const fetchArticoli = async () => {
-    try {
-      const response = await fetch('/api/articoli');
-      if (!response.ok) {
-        throw new Error('Errore nel caricamento degli articoli');
-      }
-      const data = await response.json();
-      setArticoli(data);
-    } catch (error) {
-      console.error('Errore:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const goToPrevious = () => {
     if (isAnimating) return;
