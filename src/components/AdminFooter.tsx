@@ -36,6 +36,50 @@ const GIORNI_SETTIMANA = [
   'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'
 ]
 
+// Converte il JSON degli orari in testo leggibile
+function parseOrariApertura(orariApertura: string | null | undefined): string {
+  if (!orariApertura) return ''
+  try {
+    const parsed = JSON.parse(orariApertura)
+    if (Array.isArray(parsed)) {
+      return parsed.map((item: any) => {
+        const orari = Array.isArray(item.orario)
+          ? item.orario.join(', ')
+          : item.orario
+        return `${item.giorno}: ${orari}`
+      }).join('\n')
+    }
+  } catch (e) {
+    // Se non è JSON, usa direttamente il testo
+    return orariApertura
+  }
+  return orariApertura
+}
+
+// Converte il JSON dei giorni di chiusura in array
+function parseGiorniChiusura(giorniChiusura: string | null | undefined): string[] {
+  if (!giorniChiusura) return []
+  try {
+    const parsed = JSON.parse(giorniChiusura)
+    if (Array.isArray(parsed)) {
+      return parsed
+    } else if (typeof parsed === 'string') {
+      return [parsed]
+    }
+  } catch (e) {
+    // Se non è JSON, potrebbe essere una stringa semplice
+    const valore = giorniChiusura.trim()
+    const giornoValido = GIORNI_SETTIMANA.find(g =>
+      valore.toLowerCase().includes(g.toLowerCase()) ||
+      g.toLowerCase().includes(valore.toLowerCase())
+    )
+    if (giornoValido) {
+      return [giornoValido]
+    }
+  }
+  return []
+}
+
 export default function AdminFooter() {
   const [footerInfo, setFooterInfo] = useState<FooterInfo>({
     id: '',
@@ -67,73 +111,39 @@ export default function AdminFooter() {
   // Giorni di chiusura
   const [giorniChiusuraList, setGiorniChiusuraList] = useState<string[]>([])
 
+  // Carica i dati dal database al mount
   useEffect(() => {
+    async function fetchFooterInfo() {
+      setLoading(true)
+      try {
+        const response = await fetch('/api/admin/footer')
+        if (response.ok) {
+          const data = await response.json()
+          setFooterInfo(data)
+        }
+      } catch (error) {
+        console.error('Errore nel recupero footer info:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     fetchFooterInfo()
   }, [])
 
-  // Carica il testo degli orari quando vengono caricati dal database
-  useEffect(() => {
-    if (footerInfo.orariApertura) {
-      try {
-        const parsed = JSON.parse(footerInfo.orariApertura)
-        if (Array.isArray(parsed)) {
-          // Converte il JSON in testo leggibile
-          const testo = parsed.map((item: any) => {
-            const orari = Array.isArray(item.orario)
-              ? item.orario.join(', ')
-              : item.orario
-            return `${item.giorno}: ${orari}`
-          }).join('\n')
-          setOrariTesto(testo)
-        }
-      } catch (e) {
-        // Se non è JSON, usa direttamente il testo
-        setOrariTesto(footerInfo.orariApertura)
-      }
-    }
-  }, [footerInfo.orariApertura])
+  // Aggiorna orariTesto quando cambia footerInfo.orariApertura
+  // Pattern React 19+ "adjust state during render" con prev-tracker
+  // (https://react.dev/learn/you-might-not-need-an-effect#adjusting-some-state-when-a-prop-changes)
+  const [prevOrariApertura, setPrevOrariApertura] = useState(footerInfo.orariApertura)
+  if (footerInfo.orariApertura !== prevOrariApertura) {
+    setPrevOrariApertura(footerInfo.orariApertura)
+    setOrariTesto(parseOrariApertura(footerInfo.orariApertura))
+  }
 
-  // Carica i giorni di chiusura dal database
-  useEffect(() => {
-    if (footerInfo.giorniChiusura) {
-      try {
-        const parsed = JSON.parse(footerInfo.giorniChiusura)
-        if (Array.isArray(parsed)) {
-          setGiorniChiusuraList(parsed)
-        } else if (typeof parsed === 'string') {
-          // Se è una stringa, la aggiungiamo come unico elemento
-          setGiorniChiusuraList([parsed])
-        }
-      } catch (e) {
-        // Se non è JSON, potrebbe essere una stringa semplice
-        // In questo caso, non la consideriamo come giorno di chiusura valido
-        // perché i giorni validi sono solo quelli della lista GIORNI_SETTIMANA
-        const valore = footerInfo.giorniChiusura.trim()
-        // Controlla se il valore corrisponde a un giorno della settimana
-        const giornoValido = GIORNI_SETTIMANA.find(g =>
-          valore.toLowerCase().includes(g.toLowerCase()) ||
-          g.toLowerCase().includes(valore.toLowerCase())
-        )
-        if (giornoValido) {
-          setGiorniChiusuraList([giornoValido])
-        }
-      }
-    }
-  }, [footerInfo.giorniChiusura])
-
-  async function fetchFooterInfo() {
-    setLoading(true)
-    try {
-      const response = await fetch('/api/admin/footer')
-      if (response.ok) {
-        const data = await response.json()
-        setFooterInfo(data)
-      }
-    } catch (error) {
-      console.error('Errore nel recupero footer info:', error)
-    } finally {
-      setLoading(false)
-    }
+  // Aggiorna giorniChiusuraList quando cambia footerInfo.giorniChiusura
+  const [prevGiorniChiusura, setPrevGiorniChiusura] = useState(footerInfo.giorniChiusura)
+  if (footerInfo.giorniChiusura !== prevGiorniChiusura) {
+    setPrevGiorniChiusura(footerInfo.giorniChiusura)
+    setGiorniChiusuraList(parseGiorniChiusura(footerInfo.giorniChiusura))
   }
 
   async function saveFooterInfo() {
