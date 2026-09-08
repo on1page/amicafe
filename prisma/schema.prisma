@@ -1,0 +1,339 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+}
+
+model Allergene {
+  id          String              @id @default(cuid())
+  nome        String              @unique
+  descrizione String?
+  icona       String?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+  articoli    AllergeneArticolo[]
+}
+
+model Categoria {
+  id        String     @id @default(cuid())
+  nome      String     @unique
+  ordine    Int        @default(0)
+  attiva    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  articoli  Articolo[]
+}
+
+model Articolo {
+  id                 String              @id @default(cuid())
+  nome               String
+  descrizione        String?
+  categoriaId        String
+  prezzo             Float
+  prezzoPromozionale Float?
+  scadenzaPromo      DateTime?
+  eSurgelato         Boolean             @default(false)
+  eBestChoice        Boolean             @default(false)
+  attivo             Boolean             @default(true)
+  immagineUrl        String?
+  immagineAiGenerata Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  allergeni          AllergeneArticolo[]
+  categoria          Categoria           @relation(fields: [categoriaId], references: [id])
+}
+
+model AllergeneArticolo {
+  id          String    @id @default(cuid())
+  articoloId  String
+  allergeneId String
+  articolo    Articolo  @relation(fields: [articoloId], references: [id], onDelete: Cascade)
+  allergene   Allergene @relation(fields: [allergeneId], references: [id], onDelete: Cascade)
+
+  @@unique([articoloId, allergeneId])
+}
+
+model SiteInfo {
+  id                 String   @id @default(cuid())
+  nomeLocale         String   @default("Il Nostro Ristorante")
+  slogan             String?
+  chiSiamoTitolo     String?
+  chiSiamoTesto      String?
+  chiSiamoImageUrl   String?
+  logoUrl            String?
+  faviconUrl         String?
+  telefono           String?
+  email              String?
+  prenotazioniAttive Boolean  @default(true)
+  heroTitle          String?  @default("Autentica Cucina Italiana")
+  heroSubtitle       String?
+  heroCTAText        String?  @default("Scopri il Menu")
+  heroImageUrl       String?
+  heroOverlayOpacity Float    @default(0.5)
+  specialitaTitle    String?  @default("Le Nostre Specialità")
+  specialitaSubtitle String?
+  primaryColor       String?  @default("#ea580c")
+  primaryForeground  String?  @default("#ffffff")
+  seoTitle           String?  @default("Z.ai Code Scaffold - AI-Powered Development")
+  seoDescription     String?  @default("Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.")
+  seoKeywords        String?  @default("Z.ai, Next.js, TypeScript, Tailwind CSS, shadcn/ui, AI development, React")
+  seoOgTitle         String?
+  seoOgDescription   String?
+  seoOgImage         String?
+  seoTwitterCard     String?  @default("summary_large_image")
+  seoRobots          String?
+  seoCanonical       String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model SiteImage {
+  id          String   @id @default(cuid())
+  sezione     String
+  titolo      String?
+  descrizione String?
+  url         String
+  ordine      Int      @default(0)
+  attiva      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model FooterInfo {
+  id             String   @id @default(cuid())
+  indirizzo      String?
+  citta          String?
+  cap            String?
+  provincia      String?
+  latitudine     Float?
+  longitudine    Float?
+  orariApertura  String?
+  giorniChiusura String?
+  telefono       String?
+  facebookUrl    String?
+  instagramUrl   String?
+  twitterUrl     String?
+  linkedinUrl    String?
+  whatsappUrl    String?
+  tiktokUrl      String?
+  justeatUrl     String?
+  deliverooUrl   String?
+  glovoUrl       String?
+  ubereatsUrl    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  nome      String
+  cognome   String?
+  password  String
+  ruolo     String      @default("admin")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  permessi  Permission?
+}
+
+model Permission {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  puoGestireMenu         Boolean  @default(true)
+  puoGestireFooter       Boolean  @default(true)
+  puoGestireTemi         Boolean  @default(true)
+  puoGestirePrenotazioni Boolean  @default(true)
+  puoGestireDatiAzienda  Boolean  @default(true)
+  puoGestireProfili      Boolean  @default(false)
+  puoGestireAnalytics    Boolean  @default(true)
+  puoGestireSito         Boolean  @default(true)
+  puoGestireEventi       Boolean  @default(true)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CompanyData {
+  id                       String    @id @default(cuid())
+  ragioneSociale           String?
+  partitaIva               String?
+  codiceFiscale            String?
+  indirizzo                String?
+  citta                    String?
+  cap                      String?
+  provincia                String?
+  paese                    String?
+  telefono                 String?
+  email                    String?
+  pec                      String?
+  dpoNome                  String?
+  dpoEmail                 String?
+  dpoIndirizzo             String?
+  privacyPolicy            String?
+  privacyEnabled           Boolean   @default(true)
+  privacyUrl               String?
+  privacyPolicyUpdate      DateTime?
+  cookiesPolicy            String?
+  cookiesEnabled           Boolean   @default(true)
+  cookiesUrl               String?
+  cookiesPolicyUpdate      DateTime?
+  cookieTecnici            Boolean   @default(true)
+  cookieAnalitici          Boolean   @default(true)
+  cookieMarketing          Boolean   @default(true)
+  showCookieBanner         Boolean   @default(true)
+  cookieBannerText         String?   @default("Questo sito utilizza cookie tecnici e analitici per migliorare la tua esperienza di navigazione. Cliccando su 'Autorizzo', accetti l'uso dei cookie.")
+  cookieAcceptText         String?   @default("Autorizzo")
+  cookieDeclineText        String?   @default("Annulla")
+  terminiServizio          String?
+  terminiUrl               String?
+  thirdPartyScriptsEnabled Boolean   @default(true)
+  googleAnalyticsId        String?
+  facebookPixelId          String?
+  amazonTagId              String?
+  adSenseId                String?
+  adSenseSlotHorizontal    String?
+  adSenseSlotRectangle     String?
+  adSenseSlotTop           String?
+  adSenseSlotInline        String?
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime @updatedAt
+}
+
+model Reservation {
+  id        String    @id @default(cuid())
+  nome      String
+  cognome   String
+  email     String
+  telefono  String
+  data      String
+  ora       String
+  persone   Int
+  note      String?
+  stato     String    @default("pending")
+  eventoId  String?   // Collegamento all'evento
+  evento    Evento?   @relation(fields: [eventoId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Evento {
+  id               String        @id @default(cuid())
+  titolo           String
+  slug             String        @unique
+  descrizione      String
+  descrizioneBreve String
+  immagineUrl      String?
+  data             DateTime
+  oraInizio        String
+  oraFine          String
+  prezzo           Float         @default(0)
+  etichettaPrezzo  String?
+  gratuito         Boolean       @default(false)
+  graditaPrenotazione Boolean     @default(false)
+  capacita         Int           @default(0)
+  postiDisponibili Int           @default(0)
+  location         String?
+  incluso          String?
+  infoAggiuntive   String?
+  inEvidenza       Boolean       @default(false)
+  nuovo            Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  prenotazioni     Reservation[] // Relazione con le prenotazioni
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  sessionId String
+  eventType String
+  pageUrl   String
+  productId String?
+  duration  Int?
+  referrer  String?
+  userAgent String?
+  ipHash    String?
+  country   String?
+  city      String?
+  timestamp DateTime @default(now())
+}
+
+model AnalyticsDaily {
+  id                 String   @id @default(cuid())
+  date               DateTime @unique
+  totalVisits        Int      @default(0)
+  uniqueVisitors     Int      @default(0)
+  pageViews          String?
+  avgSessionDuration Int      @default(0)
+  hourlyBreakdown    String?
+  topPages           String?
+  productViews       String?
+  conversionData     String?
+  createdAt          DateTime @default(now())
+}
+
+model AnalyticsWeekly {
+  id                 String   @id @default(cuid())
+  weekStartDate      DateTime
+  weekEndDate        DateTime
+  totalVisits        Int      @default(0)
+  uniqueVisitors     Int      @default(0)
+  avgDailyVisits     Float    @default(0)
+  bestDayOfWeek      String?
+  bestHourOfDay      Int?
+  topProducts        String?
+  conversionInsights String?
+  priceInsights      String?
+  createdAt          DateTime @default(now())
+}
+
+model AnalyticsMonthly {
+  id              String   @id @default(cuid())
+  month           String
+  year            Int
+  totalVisits     Int      @default(0)
+  uniqueVisitors  Int      @default(0)
+  avgDailyVisits  Float    @default(0)
+  bestDayOfWeek   String?
+  bestHourOfDay   Int?
+  avgWeeklyVisits Float    @default(0)
+  growthRate      Float    @default(0)
+  productInsights String?
+  priceInsights   String?
+  createdAt       DateTime @default(now())
+}
+
+model AnalyticsYearly {
+  id               String   @id @default(cuid())
+  year             Int      @unique
+  totalVisits      Int      @default(0)
+  uniqueVisitors   Int      @default(0)
+  avgMonthlyVisits Float    @default(0)
+  bestMonth        String?
+  overallTrend     String?
+  productInsights  String?
+  priceInsights    String?
+  createdAt        DateTime @default(now())
+}
+
+model BannerPubblicitario {
+  id           String   @id @default(cuid())
+  tipo         String
+  posizione    String
+  sponsorNome  String
+  sponsorLogo  String?
+  sponsorUrl   String
+  titolo       String?
+  descrizione  String?
+  ctaTesto     String?
+  ctaUrl       String?
+  immagineUrl  String?
+  coloreSfondo String?
+  attivo       Boolean  @default(true)
+  ordine       Int      @default(0)
+  pagine       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
