@@ -18,9 +18,26 @@ interface AnalyticsEvent {
   referrer?: string
 }
 
+// Helper: recupera o genera il session ID da localStorage (sync, sicuro in SSR)
+function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') return ''
+  let stored = localStorage.getItem('analytics_session_id')
+  if (!stored) {
+    try {
+      stored = crypto.randomUUID()
+    } catch (error) {
+      stored = `session_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`
+    }
+    localStorage.setItem('analytics_session_id', stored)
+  }
+  return stored
+}
+
 export function useAnalytics() {
   const router = useRouter()
-  const [sessionId, setSessionId] = useState<string>('')
+  // Lazy initializer: legge localStorage una sola volta, al primo render.
+  // Niente setState sincrono dentro useEffect.
+  const [sessionId, setSessionId] = useState<string>(getOrCreateSessionId)
   const [ipAddress, setIpAddress] = useState<string>('')
   const [isInitialized, setIsInitialized] = useState(false)
   const pageStartTimeRef = useRef<number>(Date.now())
@@ -29,7 +46,6 @@ export function useAnalytics() {
   // Funzione per ottenere l'indirizzo IP
   const fetchIpAddress = useCallback(async (): Promise<string> => {
     try {
-      // Usa un servizio che non richiede API key
       const response = await fetch('https://api.ipify.org?format=json')
       const data = await response.json()
       return data.ip || 'unknown'
@@ -58,7 +74,6 @@ export function useAnalytics() {
         ip: ipAddress
       }
 
-      // Invia all'API di tracking
       await fetch('/api/analytics/track', {
         method: 'POST',
         headers: {
@@ -73,28 +88,7 @@ export function useAnalytics() {
 
   // Inizializza la sessione
   useEffect(() => {
-    // Genera o recupera sessionId
-    let storedSessionId = localStorage.getItem('analytics_session_id')
-
-    if (!storedSessionId) {
-      storedSessionId = crypto.randomUUID()
-      localStorage.setItem('analytics_session_id', storedSessionId)
-    }
-
-    setSessionId(storedSessionId)
-
-    // Ottieni l'indirizzo IP
-    fetchIpAddress().then(ip => {
-      setIpAddress(ip)
-      setIsInitialized(true)
-
-      // Traccia la prima page view dopo aver ottenuto l'IP
-      trackEvent({
-        eventType: 'page_view',
-        pageUrl: window.location.pathname,
-        referrer: document.referrer || ''
-      })
-    })
+    // sessionId è già pronto dal lazy initializer, non serve setSessionId qui
 
     // Salva l'URL iniziale
     previousUrlRef.current = window.location.pathname
@@ -102,14 +96,23 @@ export function useAnalytics() {
     // Salva il tempo di inizio della sessione
     pageStartTimeRef.current = Date.now()
 
+    // Ottieni l'indirizzo IP (setState dentro .then è async, consentito)
+    fetchIpAddress().then(ip => {
+      setIpAddress(ip)
+      setIsInitialized(true)
+
+      trackEvent({
+        eventType: 'page_view',
+        pageUrl: window.location.pathname,
+        referrer: document.referrer || ''
+      })
+    })
+
     // Ascolta i cambiamenti di rotta
     const handleRouteChange = (url: string) => {
       const previousUrl = previousUrlRef.current
-
-      // Calcola il tempo speso sulla pagina precedente
       const duration = Date.now() - pageStartTimeRef.current
 
-      // Traccia l'evento page view con la durata della pagina precedente
       trackEvent({
         eventType: 'page_view',
         pageUrl: url,
@@ -117,15 +120,15 @@ export function useAnalytics() {
         referrer: previousUrl
       })
 
-      // Aggiorna riferimenti
       previousUrlRef.current = url
       pageStartTimeRef.current = Date.now()
     }
 
     // Next.js 13+ usa l'evento popstate per rilevare i cambiamenti di rotta
-    window.addEventListener('popstate', () => {
+    const onPopState = () => {
       handleRouteChange(window.location.pathname)
-    })
+    }
+    window.addEventListener('popstate', onPopState)
 
     // Override di pushState e replaceState per intercettare la navigazione
     const originalPushState = history.pushState
@@ -143,13 +146,10 @@ export function useAnalytics() {
 
     // Cleanup
     return () => {
-      window.removeEventListener('popstate', () => {
-        handleRouteChange(window.location.pathname)
-      })
+      window.removeEventListener('popstate', onPopState)
       history.pushState = originalPushState
       history.replaceState = originalReplaceState
 
-      // Traccia l'evento finale quando l'utente lascia la pagina
       const finalDuration = Date.now() - pageStartTimeRef.current
       trackEvent({
         eventType: 'page_view',
