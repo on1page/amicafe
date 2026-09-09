@@ -58,7 +58,7 @@ model AllergeneArticolo {
 
 model SiteInfo {
   id                 String   @id @default(cuid())
-  nomeLocale         String   @default("Il Nostro Ristorante")
+  nomeLocale         String   @default("Ami Café")
   slogan             String?
   chiSiamoTitolo     String?
   chiSiamoTesto      String?
@@ -68,7 +68,7 @@ model SiteInfo {
   telefono           String?
   email              String?
   prenotazioniAttive Boolean  @default(true)
-  heroTitle          String?  @default("Autentica Cucina Italiana")
+  heroTitle          String?  @default("Ami Cafè")
   heroSubtitle       String?
   heroCTAText        String?  @default("Scopri il Menu")
   heroImageUrl       String?

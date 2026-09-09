@@ -54,7 +54,7 @@ export default function AdminSiteInfo() {
     telefono: '',
     email: '',
     prenotazioniAttive: true,
-    heroTitle: 'Autentica Cucina Italiana',
+    heroTitle: '',
     heroSubtitle: '',
     heroCTAText: 'Scopri il Menu',
     heroImageUrl: '',
