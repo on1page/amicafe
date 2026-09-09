@@ -8,7 +8,7 @@ interface ChiSiamoProps {
 
 export default function ChiSiamo({
   title = "Chi Siamo",
-  content = "Dal 1985, portiamo in tavola l'autentica tradizione culinaria italiana. La nostra passione per la cucina e l'amore per gli ingredienti freschi e di qualità si riflette in ogni piatto che prepariamo. Ogni giorno, il nostro chef seleziona personalmente i migliori prodotti locali per creare piatti che raccontano storie di gusto e tradizione.",
+  content = "adizione culinaria italiana. La nostra passione per la cucina e l'amore per gli ingredienti freschi e di qualità si riflette in ogni piatto che prepariamo. Ogni giorno, il nostro chef seleziona personalmente i migliori prodotti locali per creare piatti che raccontano storie di gusto e tradizione.",
   image = "/images/chef.jpg"
 }: ChiSiamoProps) {
   return (

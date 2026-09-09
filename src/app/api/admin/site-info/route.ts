@@ -10,9 +10,9 @@ export async function GET() {
     if (!siteInfo) {
       siteInfo = await db.siteInfo.create({
         data: {
-          nomeLocale: 'Il Nostro Ristorante',
-          heroTitle: 'Autentica Cucina Italiana',
-          heroCTAText: 'Scopri il Menu',
+          nomeLocale: 'Ami Cafè',
+          heroTitle: 'Ami Cafè',
+          heroCTAText: 'Le nostre Proposte',
           specialitaTitle: 'Le Nostre Specialità'
         }
       });
