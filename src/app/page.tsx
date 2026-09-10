@@ -82,26 +82,26 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header
-        siteName={siteInfo.nomeLocale || 'Il Nostro Ristorante'}
+        siteName={siteInfo.nomeLocale || 'Ami Café'}
         logoUrl={siteInfo.logoUrl}
         onAdminClick={handleAdminClick}
         isLoggedIn={isLoggedIn}
         onLogout={handleLogout}
-        prenotazioniAttive={siteInfo.prenotazioniAttive ?? true}
+        prenotazioniAttive={siteInfo.prenotazioniAttive ?? false}
       />
 
       <main className="flex-1">
         <Hero
           title={siteInfo.heroTitle || 'Ami Café'}
-          subtitle={siteInfo.heroSubtitle || 'Scopri i sapori tradizionali della nostra cucina, preparati con passione e ingredienti freschi ogni giorno'}
+          subtitle={siteInfo.heroSubtitle || 'Dalla Colazione all aperitivo'}
           heroImage={siteInfo.heroImageUrl}
-          ctaText={siteInfo.heroCTAText || 'Scopri il Menu'}
+          ctaText={siteInfo.heroCTAText || 'Le nostre proposte'}
           heroOverlayOpacity={siteInfo.heroOverlayOpacity ?? 0.5}
         />
 
         <ChiSiamo
-          title={siteInfo.chiSiamoTitolo || 'Chi Siamo'}
-          content={siteInfo.chiSiamoTesto || 'Dal 1985, portiamo in tavola l\'autentica tradizione culinaria italiana. La nostra passione per la cucina e l\'amore per gli ingredienti freschi e di qualità si riflette in ogni piatto che prepariamo.'}
+          title={siteInfo.chiSiamoTitolo || 'Un po di noi..'}
+          content={siteInfo.chiSiamoTesto || 'Dal 2020 vi aspettiamo ogni mattina per darvi un sorriso accompagnato da un ottima colazione realizzata con prodotti freschi e genuini. E la sera per uno sfizioso aperitivo o un delizioso cocktail.'}
           image={siteInfo.chiSiamoImageUrl}
         />
 
@@ -110,7 +110,7 @@ export default function Home() {
           showPromo={true}
           limit={6}
           title={siteInfo.specialitaTitle || 'Le Nostre Specialità'}
-          subtitle={siteInfo.specialitaSubtitle || 'Scopri i piatti più amati dai nostri clienti e le offerte speciali del momento'}
+          subtitle={siteInfo.specialitaSubtitle || 'Scopri perchè i nostri clienti ci preferiscono'}
         />
 
         <HomeEventi />
