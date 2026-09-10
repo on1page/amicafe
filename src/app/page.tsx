@@ -92,7 +92,7 @@ export default function Home() {
 
       <main className="flex-1">
         <Hero
-          title={siteInfo.heroTitle || 'Autentica Cucina Italiana'}
+          title={siteInfo.heroTitle || 'Ami Café'}
           subtitle={siteInfo.heroSubtitle || 'Scopri i sapori tradizionali della nostra cucina, preparati con passione e ingredienti freschi ogni giorno'}
           heroImage={siteInfo.heroImageUrl}
           ctaText={siteInfo.heroCTAText || 'Scopri il Menu'}
