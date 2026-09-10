@@ -234,7 +234,7 @@ async function main() {
     create: {
       id: 'default',
       nomeLocale: 'La Bella Tavola',
-      slogan: 'Autentica Cucina Italiana dal 1985',
+      slogan: 'Ami Cafè',
       chiSiamoTitolo: 'La Nostra Storia',
       chiSiamoTesto: 'Dal 1985, La Bella Tavola porta in tavola l\'autentica tradizione culinaria italiana. La nostra passione per la cucina e l\'amore per gli ingredienti freschi e di qualità si riflette in ogni piatto che prepariamo. Ogni giorno, il nostro chef seleziona personalmente i migliori prodotti locali per creare piatti che raccontano storie di gusto e tradizione.',
       telefono: '+39 02 1234 5678',
